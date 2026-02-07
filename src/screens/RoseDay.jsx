@@ -2,178 +2,161 @@ import { useRef, useState, useEffect } from "react";
 import { gsap } from "gsap";
 
 export default function RoseDay({ onComplete }) {
-  const gaspRef = useRef(null);
   const meRef = useRef(null);
   const youRef = useRef(null);
+  const textRef = useRef(null);
 
-  const [answered, setAnswered] = useState(false);
-  const [showGasp, setShowGasp] = useState(false);
+  const [step, setStep] = useState(0);
+  const [escapeMode, setEscapeMode] = useState(false);
 
-  const triggerGasp = () => {
-    setShowGasp(true);
+  useEffect(() => {
     gsap.fromTo(
-      gaspRef.current,
-      { scale: 0, rotate: -10, opacity: 0 },
-      {
-        scale: 1,
-        rotate: 0,
-        opacity: 1,
-        duration: 0.6,
-        ease: "back.out(1.7)",
-      }
+      textRef.current,
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.8 }
     );
-  };
+  }, [step]);
 
-  const handleMouseMove = (e, ref) => {
+  const handleEscape = (e, ref) => {
     if (!escapeMode) return;
 
     const rect = ref.current.getBoundingClientRect();
-    const btnX = rect.left + rect.width / 2;
-    const btnY = rect.top + rect.height / 2;
-
-    const dx = e.clientX - btnX;
-    const dy = e.clientY - btnY;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-
-    if (distance < 220) {
-      if (teleportMode) {
-        teleport(ref);
-      } else {
-        gsap.to(ref.current, {
-          x: -dx * 1.4 + (Math.random() * 300 - 150),
-          y: -dy * 1.4 + (Math.random() * 300 - 150),
-          rotate: Math.random() * 30 - 15,
-          duration: 0.18,
-          ease: "power4.out",
-        });
-      }
-    }
-  };
-
-  const [escapeMode, setEscapeMode] = useState(true);
-  const [teleportMode, setTeleportMode] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setEscapeMode(false);
-      setTeleportMode(false);
-
-      gsap.to([meRef.current, youRef.current], {
-        x: 0,
-        y: 0,
-        rotate: 0,
-        duration: 0.8,
-        ease: "power3.out",
-      });
-    }, 30000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  const teleport = (ref) => {
-    const padding = 120;
-
-    const x =
-      Math.random() * (window.innerWidth - padding * 2) -
-      window.innerWidth / 2 +
-      padding;
-
-    const y =
-      Math.random() * (window.innerHeight - padding * 2) -
-      window.innerHeight / 2 +
-      padding;
+    const dx = e.clientX - rect.left;
+    const dy = e.clientY - rect.top;
 
     gsap.to(ref.current, {
-      x,
-      y,
-      rotate: Math.random() * 40 - 20,
-      duration: 0.25,
-      ease: "power4.out",
+      x: -dx + Math.random() * 200 - 100,
+      y: -dy + Math.random() * 200 - 100,
+      rotate: Math.random() * 20 - 10,
+      duration: 0.2,
     });
   };
 
-  useEffect(() => {
-    if (!escapeMode) return;
-
-    const switcher = setInterval(() => {
-      setTeleportMode((prev) => !prev);
-    }, Math.random() * 2000 + 3000);
-
-    return () => clearInterval(switcher);
-  }, [escapeMode]);
-
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center text-center px-6 gap-6">
-      <h1 className="text-4xl">Rose Day 🌹</h1>
+    <div className="relative overflow-hidden" style={{ height: "calc(100vh - 48px)" }}>
+      {/* BACKGROUND */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{
+          backgroundImage: "url('/assets/photos/richika-bg.png')",
+          filter: "blur(15px) brightness(0.8)",
+        }}
+      />
+      <div className="absolute inset-0 bg-black/60" />
 
-      <p className="max-w-md text-lg">If love had a smell, it would be you.</p>
+      {/* CONTENT */}
+      <div className="relative z-10 min-h-screen flex flex-col items-center justify-center text-center px-6 gap-6 text-cream" style={{ height: "calc(100vh - 48px)" }}>
 
-      {/* QUESTION */}
-      {!answered && (
-        <div className="bg-white/70 p-4 rounded-xl">
-          <p className="mb-3 text-lg">Who fell first? 😏</p>
-          <div
-            className="flex gap-12 justify-center relative mt-4"
-            onMouseMove={(e) => {
-            //   handleMouseMove(e, meRef);
-              handleMouseMove(e, youRef);
-            }}
-          >
+        {/* STEP 0 */}
+        {step === 0 && (
+          <div ref={textRef}>
+            <h1 className="text-3xl mb-2">Hi Richika 🌸</h1>
+            <p>This is just something I made for you.</p>
             <button
-              ref={meRef}
-            //   disabled={!escapeMode}
-              onClick={() => setAnswered(true)}
-              className={`px-6 py-2 rounded-full shadow-xl transition bg-rose text-white`}
+              className="mt-6 px-6 py-2 bg-rose text-white rounded-full"
+              onClick={() => setStep(1)}
             >
-              Me 😌
-            </button>
-
-            <button
-              ref={youRef}
-              disabled={!escapeMode}
-              onClick={() => setAnswered(true)}
-              className={`px-6 py-2 rounded-full shadow-xl transition bg-wine text-cream`}
-            >
-              You 😏
+              Okay
             </button>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* GASP BUTTON */}
-      {answered && !showGasp && (
-        <button
-          onClick={triggerGasp}
-          className="px-5 py-2 bg-wine text-cream rounded-full"
-        >
-          Click if brave 😳
-        </button>
-      )}
+        {/* STEP 1 */}
+        {step === 1 && (
+          <div ref={textRef}>
+            <p className="text-lg mb-4">
+              Before anything else,<br />
+              do you like roses?
+            </p>
+            <div className="flex gap-6 justify-center">
+              <button
+                className="px-5 py-2 bg-rose rounded-full"
+                onClick={() => setStep(2)}
+              >
+                Yes 🌹
+              </button>
+              <button
+                className="px-5 py-2 bg-wine rounded-full"
+                onClick={() => setStep(2)}
+              >
+                I prefer you 😌
+              </button>
+            </div>
+          </div>
+        )}
 
-      {/* GASP MOMENT */}
-      {showGasp && (
-        <div ref={gaspRef} className="text-2xl font-bold text-rose">
-          You had no chance. I was already yours 💘
-        </div>
-      )}
+        {/* STEP 2 */}
+        {step === 2 && (
+          <div
+            ref={textRef}
+            onMouseMove={(e) => handleEscape(e, youRef)}
+          >
+            <p className="text-lg mb-4">
+              Then tell me one thing honestly.
+              <br />
+              Who fell first?
+            </p>
 
-      {/* MEMORY IMAGE */}
-      {showGasp && (
-        <img
-          src="assets/photos/rose1.png"
-          className="w-64 rounded-xl blur-sm hover:blur-none transition-all duration-500"
-        />
-      )}
+            <div className="flex gap-10 justify-center">
+              <button
+                ref={meRef}
+                className="px-6 py-2 bg-rose rounded-full"
+                onClick={() => {
+                  setEscapeMode(false);
+                  setStep(3);
+                }}
+              >
+                Mayank 😌
+              </button>
 
-      {/* CONTINUE */}
-      {showGasp && (
-        <button
-          onClick={onComplete}
-          className="mt-6 px-6 py-3 bg-rose text-white rounded-full"
-        >
-          Continue 💖
-        </button>
-      )}
+              <button
+                ref={youRef}
+                className="px-6 py-2 bg-wine rounded-full"
+                onMouseEnter={() => setEscapeMode(true)}
+              >
+                Richika 😏
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 3 */}
+        {step === 3 && (
+          <div ref={textRef}>
+            <p className="text-2xl font-semibold text-rose">
+              It was me.
+              <br />
+              Quietly. Completely.
+            </p>
+            <button
+              className="mt-6 px-6 py-2 bg-rose rounded-full"
+              onClick={() => setStep(4)}
+            >
+              See why
+            </button>
+          </div>
+        )}
+
+        {/* STEP 4 */}
+        {step === 4 && (
+          <div ref={textRef} className="flex flex-col items-center gap-4">
+            <img
+              src="/assets/photos/mayank-richika-1.png"
+              className="w-128 rounded-2xl shadow-2xl"
+            />
+            <p className="text-sm opacity-80">
+              Somewhere between this moment<br />
+              and now, I chose you.
+            </p>
+            <button
+              className="mt-4 px-6 py-2 bg-rose rounded-full"
+              onClick={onComplete}
+            >
+              One more thing 💌
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

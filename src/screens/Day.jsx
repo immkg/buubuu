@@ -19,10 +19,7 @@ export default function Day({ dayIndex, onComplete }) {
       <p className="max-w-md text-lg mb-6">{content.text}</p>
 
       {dayKey === "valentine" ? (
-        <ChoiceButtons
-          onYes={() => alert("LOCKED IN 💍")}
-          onNo={() => {}}
-        />
+        <ChoiceButtons onYes={() => alert("LOCKED IN 💍")} onNo={() => {}} />
       ) : (
         <button
           onClick={onComplete}
