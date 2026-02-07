@@ -1,3 +1,5 @@
+// src/data/valentineDays.js
+
 export const VALENTINE_DAYS = [
     { id: 1, key: "rose", label: "Rose Day", icon: "🌹" },
     { id: 2, key: "chocolate", label: "Chocolate Day", icon: "🍫" },
