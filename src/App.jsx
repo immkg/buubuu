@@ -13,20 +13,21 @@ export default function App() {
   const [currentDay, setCurrentDay] = useState(todayIndex);
   const [completedDays, setCompletedDays] = useState(getCompletedDays());
 
-  const isLocked = currentDay > todayIndex;
+  const isLocked =
+    currentDay !== todayIndex && !completedDays.includes(currentDay);
 
   const completeDay = () => {
     markDayCompleted(currentDay);
     setCompletedDays(getCompletedDays());
-  
-    // move to next day (but not beyond todayIndex)
-    setCurrentDay((prev) => Math.min(prev + 1, todayIndex));
+
+    // move to NEXT day even if locked
+    setCurrentDay((prev) => prev + 1);
   };
-  
 
   return (
     <>
       <HeartCursor />
+
       <ValentineStepper
         todayIndex={todayIndex}
         currentDay={currentDay}
