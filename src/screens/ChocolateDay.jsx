@@ -10,6 +10,7 @@ export default function ChocolateDay({ onComplete }) {
   const canvasRef = useRef(null);
   const imgRef = useRef(new Image());
   const chocoRef = useRef(new Image());
+  const piecesRef = useRef([]);
   const [pieces, setPieces] = useState([]);
 
   useEffect(() => {
@@ -57,11 +58,12 @@ export default function ChocolateDay({ onComplete }) {
       }
     }
 
+    piecesRef.current = list;
     setPieces(list);
     draw(list);
   };
 
-  const draw = (list = pieces) => {
+  const draw = (list = piecesRef.current) => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -82,7 +84,7 @@ export default function ChocolateDay({ onComplete }) {
   };
 
   const checkCompletion = () => {
-    if (pieces.length && pieces.every((p) => p.locked)) {
+    if (piecesRef.current.every((p) => p.locked)) {
       setTimeout(transform, 800);
     }
   };
@@ -100,15 +102,9 @@ export default function ChocolateDay({ onComplete }) {
       const mx = e.clientX - r.left;
       const my = e.clientY - r.top;
 
-      for (let i = pieces.length - 1; i >= 0; i--) {
-        const p = pieces[i];
-        if (
-          !p.locked &&
-          mx > p.x &&
-          mx < p.x + p.w &&
-          my > p.y &&
-          my < p.y + p.h
-        ) {
+      for (let i = piecesRef.current.length - 1; i >= 0; i--) {
+        const p = piecesRef.current[i];
+        if (!p.locked && mx > p.x && mx < p.x + p.w && my > p.y && my < p.y + p.h) {
           active = p;
           ox = mx - p.x;
           oy = my - p.y;
@@ -118,47 +114,49 @@ export default function ChocolateDay({ onComplete }) {
     };
 
     const move = (e) => {
-      if (!active) return;
+      if (!active || active.locked) return;
       const r = canvas.getBoundingClientRect();
-
       let newX = e.clientX - r.left - ox;
       let newY = e.clientY - r.top - oy;
 
       newX = clamp(newX, 0, canvas.width - active.w);
       newY = clamp(newY, 0, canvas.height - active.h);
 
+      // Update position
       active.x = newX;
       active.y = newY;
 
-      draw();
-
-      // ✅ check completion on every move
-      if (
-        Math.hypot(active.x - active.cx, active.y - active.cy) < SNAP_DISTANCE
-      ) {
+      // Snap to correct position
+      if (Math.hypot(active.x - active.cx, active.y - active.cy) < SNAP_DISTANCE) {
         active.x = active.cx;
         active.y = active.cy;
         active.locked = true;
       }
 
+      draw();
       checkCompletion();
     };
 
     const up = () => {
+      if (active) {
+        draw();
+        setPieces([...piecesRef.current]); // update state so React re-renders
+      }
       active = null;
-      draw();
     };
 
     canvas.addEventListener("pointerdown", down);
     canvas.addEventListener("pointermove", move);
     canvas.addEventListener("pointerup", up);
+    canvas.addEventListener("pointerleave", up); // handle pointer leaving canvas
 
     return () => {
       canvas.removeEventListener("pointerdown", down);
       canvas.removeEventListener("pointermove", move);
       canvas.removeEventListener("pointerup", up);
+      canvas.removeEventListener("pointerleave", up);
     };
-  }, [pieces]);
+  }, []);
 
   const transform = () => {
     const canvas = canvasRef.current;
