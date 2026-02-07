@@ -1,10 +1,16 @@
 import { VALENTINE_DAYS } from "../data/valentineDays";
 import { DAY_CONTENT } from "../data/dayContent";
 import ChoiceButtons from "../components/ChoiceButtons";
+import RoseDay from "./RoseDay";
 
 export default function Day({ dayIndex, onComplete }) {
   const dayKey = VALENTINE_DAYS[dayIndex].key;
   const content = DAY_CONTENT[dayKey];
+
+  // 🌹 Custom Rose Day
+  if (dayKey === "rose") {
+    return <RoseDay onComplete={onComplete} />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center text-center px-6">

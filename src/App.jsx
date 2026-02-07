@@ -18,7 +18,11 @@ export default function App() {
   const completeDay = () => {
     markDayCompleted(currentDay);
     setCompletedDays(getCompletedDays());
+  
+    // move to next day (but not beyond todayIndex)
+    setCurrentDay((prev) => Math.min(prev + 1, todayIndex));
   };
+  
 
   return (
     <>
