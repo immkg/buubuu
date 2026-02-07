@@ -69,23 +69,14 @@ export default function ChocolateDay({ onComplete }) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     list.forEach((p) => {
-      ctx.drawImage(
-        imgRef.current,
-        p.sx,
-        p.sy,
-        p.sw,
-        p.sh,
-        p.x,
-        p.y,
-        p.w,
-        p.h
-      );
+      ctx.drawImage(imgRef.current, p.sx, p.sy, p.sw, p.sh, p.x, p.y, p.w, p.h);
     });
   };
 
   const checkCompletion = () => {
     if (piecesRef.current.every((p) => p.locked)) {
-      setTimeout(transform, 800);
+      // Start the border animation immediately
+      transform();
     }
   };
 
@@ -104,7 +95,13 @@ export default function ChocolateDay({ onComplete }) {
 
       for (let i = piecesRef.current.length - 1; i >= 0; i--) {
         const p = piecesRef.current[i];
-        if (!p.locked && mx > p.x && mx < p.x + p.w && my > p.y && my < p.y + p.h) {
+        if (
+          !p.locked &&
+          mx > p.x &&
+          mx < p.x + p.w &&
+          my > p.y &&
+          my < p.y + p.h
+        ) {
           active = p;
           ox = mx - p.x;
           oy = my - p.y;
@@ -127,7 +124,9 @@ export default function ChocolateDay({ onComplete }) {
       active.y = newY;
 
       // Snap to correct position
-      if (Math.hypot(active.x - active.cx, active.y - active.cy) < SNAP_DISTANCE) {
+      if (
+        Math.hypot(active.x - active.cx, active.y - active.cy) < SNAP_DISTANCE
+      ) {
         active.x = active.cx;
         active.y = active.cy;
         active.locked = true;
@@ -162,21 +161,71 @@ export default function ChocolateDay({ onComplete }) {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
 
-    gsap.to(canvas, {
-      scale: 1.08,
-      duration: 0.4,
-      yoyo: true,
-      repeat: 1,
-      onComplete: () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(chocoRef.current, 0, 0, canvas.width, canvas.height);
-        gsap.fromTo(
-          canvas,
-          { opacity: 0 },
-          { opacity: 1, duration: 5, onComplete: () => onComplete() }
-        );
-      },
+    // Start border animation while keeping puzzle visible
+    drawBorderAnimation(canvas, ctx, () => {
+      // After 2.5s, show chocolate image
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(chocoRef.current, 0, 0, canvas.width, canvas.height);
+      gsap.fromTo(
+        canvas,
+        { opacity: 0 },
+        { opacity: 1, duration: 1, onComplete: () => onComplete() }
+      );
     });
+  };
+
+  // Animate four lines around the canvas edges
+  const drawBorderAnimation = (canvas, ctx, onComplete) => {
+    const duration = 5; // border animation duration
+    const lineWidth = 6;
+    ctx.lineWidth = lineWidth;
+    ctx.strokeStyle = "#D2691E"; // chocolate color
+
+    const timeline = gsap.timeline({ onComplete });
+
+    // Animate all four borders simultaneously
+    timeline.to(
+      { progress: 0 },
+      {
+        progress: 1,
+        duration,
+        ease: "power1.inOut",
+        onUpdate: function () {
+          const p = this.targets()[0].progress;
+
+          // First, draw the puzzle pieces
+          draw(); // <-- reuse your existing draw function to draw puzzle
+
+          // Then draw borders on top
+          // Top border
+          ctx.beginPath();
+          ctx.moveTo(0, lineWidth / 2);
+          ctx.lineTo(canvas.width * p, lineWidth / 2);
+          ctx.stroke();
+
+          // Right border
+          ctx.beginPath();
+          ctx.moveTo(canvas.width - lineWidth / 2, 0);
+          ctx.lineTo(canvas.width - lineWidth / 2, canvas.height * p);
+          ctx.stroke();
+
+          // Bottom border
+          ctx.beginPath();
+          ctx.moveTo(canvas.width, canvas.height - lineWidth / 2);
+          ctx.lineTo(
+            canvas.width - canvas.width * p,
+            canvas.height - lineWidth / 2
+          );
+          ctx.stroke();
+
+          // Left border
+          ctx.beginPath();
+          ctx.moveTo(lineWidth / 2, canvas.height);
+          ctx.lineTo(lineWidth / 2, canvas.height - canvas.height * p);
+          ctx.stroke();
+        },
+      }
+    );
   };
 
   return (
