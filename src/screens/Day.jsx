@@ -1,0 +1,30 @@
+import { VALENTINE_DAYS } from "../data/valentineDays";
+import { DAY_CONTENT } from "../data/dayContent";
+import ChoiceButtons from "../components/ChoiceButtons";
+
+export default function Day({ dayIndex, onComplete }) {
+  const dayKey = VALENTINE_DAYS[dayIndex].key;
+  const content = DAY_CONTENT[dayKey];
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center text-center px-6">
+      <h1 className="text-4xl mb-4">{content.title}</h1>
+
+      <p className="max-w-md text-lg mb-6">{content.text}</p>
+
+      {dayKey === "valentine" ? (
+        <ChoiceButtons
+          onYes={() => alert("LOCKED IN 💍")}
+          onNo={() => {}}
+        />
+      ) : (
+        <button
+          onClick={onComplete}
+          className="px-6 py-3 bg-rose text-white rounded-full"
+        >
+          Continue 💖
+        </button>
+      )}
+    </div>
+  );
+}
