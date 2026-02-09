@@ -154,7 +154,7 @@ export default function RoseDay({ onComplete }) {
               className="mt-4 px-6 py-2 bg-rose rounded-full"
               onClick={onComplete}
             >
-              One more thing 💌
+              Keep Going 💌
             </button>
           </div>
         )}

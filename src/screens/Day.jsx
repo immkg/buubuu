@@ -5,9 +5,10 @@ import { DAY_CONTENT } from "../data/dayContent";
 import ChoiceButtons from "../components/ChoiceButtons";
 import RoseDay from "./RoseDay";
 import ChocolateDay from "./ChocolateDay";
+import TeddyDay from "./TeddyDay";
 
 export default function Day({ dayIndex, onComplete }) {
-  const dayKey = VALENTINE_DAYS[dayIndex].key;
+  const dayKey = "teddy";
   const content = DAY_CONTENT[dayKey];
 
   // 🌹 Custom Rose Day
@@ -18,7 +19,11 @@ export default function Day({ dayIndex, onComplete }) {
   if (dayKey === "chocolate") {
     return <ChocolateDay onComplete={onComplete} />;
   }
-  
+
+  if (dayKey === "teddy") {
+    return <TeddyDay onComplete={onComplete} />;
+  }
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center text-center px-6">
       <h1 className="text-4xl mb-4">{content.title}</h1>

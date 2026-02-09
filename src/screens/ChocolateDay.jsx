@@ -13,6 +13,7 @@ export default function ChocolateDay({ onComplete }) {
   const cutoutRef = useRef(new Image());
   const piecesRef = useRef([]);
   const [pieces, setPieces] = useState([]);
+  const [showNext, setShowNext] = useState(false);
 
   // Floating images refs
   const floatingRef = useRef([]);
@@ -168,7 +169,7 @@ export default function ChocolateDay({ onComplete }) {
       startFloatingCutouts();
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(chocoRef.current, 0, 0, canvas.width, canvas.height);
-     
+      setShowNext(true);
     });
   };
 
@@ -183,7 +184,7 @@ export default function ChocolateDay({ onComplete }) {
     floatingRef.current = [];
 
     for (let i = 0; i < numFloating; i++) {
-      const img = cutoutRef.current
+      const img = cutoutRef.current;
       const w = 60 + Math.random() * 40;
       const h = (img.naturalHeight / img.naturalWidth) * w;
       const el = document.createElement("img");
@@ -289,6 +290,14 @@ export default function ChocolateDay({ onComplete }) {
         className="shadow-2xl rounded-xl touch-none z-10"
         style={{ zIndex: 10 }}
       />
+      {showNext && (
+        <button
+          className="text-white mt-4 px-6 py-2 bg-rose rounded-full animate-fade-in"
+          onClick={onComplete}
+        >
+          Keep Going 💌
+        </button>
+      )}
     </div>
   );
 }
