@@ -14,7 +14,7 @@ export default function App() {
   const [completedDays, setCompletedDays] = useState(getCompletedDays());
 
   const isLocked =
-    currentDay !== todayIndex && !completedDays.includes(currentDay);
+    currentDay > todayIndex && !completedDays.includes(currentDay);
 
   const completeDay = () => {
     markDayCompleted(currentDay);
