@@ -4,14 +4,12 @@ import { motion } from "framer-motion";
 export default function ValentineStepper({
   todayIndex,
   currentDay,
-  completedDays,
   onSelectDay,
 }) {
   return (
     <div className="sticky top-0 z-50 bg-white/70 backdrop-blur py-2 flex justify-center gap-3">
       {VALENTINE_DAYS.map((day, index) => {
         const isLocked = index > todayIndex;
-        const isCompleted = completedDays.includes(index);
         const isActive = index === currentDay;
 
         return (
@@ -21,11 +19,7 @@ export default function ValentineStepper({
             className={`text-2xl ${
               isLocked ? "opacity-30 cursor-not-allowed" : "cursor-pointer"
             }`}
-            animate={
-              isActive
-                ? { scale: [1, 1.2, 1] }
-                : { scale: 1 }
-            }
+            animate={isActive ? { scale: [1, 1.2, 1] } : { scale: 1 }}
             transition={{ repeat: isActive ? Infinity : 0, duration: 1.2 }}
           >
             {day.icon}
