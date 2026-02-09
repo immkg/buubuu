@@ -6,13 +6,17 @@ import ChoiceButtons from "../components/ChoiceButtons";
 import RoseDay from "./RoseDay";
 import ChocolateDay from "./ChocolateDay";
 import TeddyDay from "./TeddyDay";
+import ProposeDay from "./ProposeDay";
 
 export default function Day({ dayIndex, onComplete }) {
-  const dayKey = VALENTINE_DAYS[dayIndex].key;
+  const dayKey = "propose";
   const content = DAY_CONTENT[dayKey];
 
   if (dayKey === "rose") {
     return <RoseDay onComplete={onComplete} />;
+  }
+  if (dayKey === "propose") {
+    return <ProposeDay onComplete={onComplete} />;
   }
 
   if (dayKey === "chocolate") {
