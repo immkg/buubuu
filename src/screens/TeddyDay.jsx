@@ -6,17 +6,16 @@ const CANVAS_H = 480;
 const GRAVITY = 0.35;
 
 // Teddy movement bounds
-const TEDDY_TOP_MIN = CANVAS_H * 0.05;
-const TEDDY_TOP_MAX = CANVAS_H * 0.25;
-const TEDDY_SPEED = 0.35;
+const TEDDY_TOP_MIN = CANVAS_H * 0.08;
+const TEDDY_TOP_MAX = CANVAS_H * 0.28;
+const TEDDY_SPEED = 0.4;
 
 export default function TeddyDay({ onComplete }) {
   const canvasRef = useRef(null);
 
   /* ---------------- STATE ---------------- */
 
-  const [uiState, setUiState] = useState("angle");
-  const [showNext, setShowNext] = useState(false);
+  const [uiState, setUiState] = useState("angle"); // angle | power | throw | success
   const stateRef = useRef("angle");
 
   /* ---------------- ANGLE ---------------- */
@@ -43,33 +42,17 @@ export default function TeddyDay({ onComplete }) {
     active: false,
   });
 
-  /* ---------------- TEDDIES (ONLY 2) ---------------- */
+  /* ---------------- SINGLE TEDDY ---------------- */
 
-  const teddyImgs = useRef([
-    "/assets/photos/teddy-medium.png",
-    "/assets/photos/teddy-big.png",
-  ]);
-
-  const teddies = useRef([
-    {
-      x: 120,
-      y: 110,
-      r: 42,
-      vx: TEDDY_SPEED,
-      vy: TEDDY_SPEED * 0.6,
-      img: new Image(),
-      hit: false,
-    },
-    {
-      x: 240,
-      y: 140,
-      r: 52,
-      vx: -TEDDY_SPEED * 0.8,
-      vy: TEDDY_SPEED,
-      img: new Image(),
-      hit: false,
-    },
-  ]);
+  const teddy = useRef({
+    x: CANVAS_W / 2,
+    y: 120,
+    r: 52,
+    vx: TEDDY_SPEED,
+    vy: TEDDY_SPEED * 0.8,
+    img: new Image(),
+    hit: false,
+  });
 
   /* ---------------- INIT ---------------- */
 
@@ -78,9 +61,7 @@ export default function TeddyDay({ onComplete }) {
     canvas.width = CANVAS_W;
     canvas.height = CANVAS_H;
 
-    teddies.current.forEach((t, i) => {
-      t.img.src = teddyImgs.current[i];
-    });
+    teddy.current.img.src = "/assets/photos/teddy-big.png";
 
     startAngleTween();
     requestAnimationFrame(animate);
@@ -103,7 +84,6 @@ export default function TeddyDay({ onComplete }) {
 
   const lockAngle = () => {
     gsap.killTweensOf(angleRef.current);
-
     lockedAngle.current = angleRef.current.value;
     powerTime.current = 0;
 
@@ -121,7 +101,7 @@ export default function TeddyDay({ onComplete }) {
 
     ring.current.vx = Math.sin(lockedAngle.current) * strength;
     ring.current.vy = -Math.cos(lockedAngle.current) * strength;
-    ring.current.spin = 0.2 + power * 0.6;
+    ring.current.spin = 0.25 + power * 0.6;
     ring.current.active = true;
 
     stateRef.current = "throw";
@@ -150,62 +130,35 @@ export default function TeddyDay({ onComplete }) {
     ctx.restore();
   };
 
-  /* ---------------- TEDDY MOVEMENT ---------------- */
+  /* ---------------- TEDDY MOVE ---------------- */
 
-  const updateTeddies = () => {
-    const list = teddies.current;
+  const updateTeddy = () => {
+    const t = teddy.current;
+    if (t.hit) return;
 
-    // Move + wall bounce
-    list.forEach((t) => {
-      if (t.hit) return;
+    t.x += t.vx;
+    t.y += t.vy;
 
-      t.x += t.vx;
-      t.y += t.vy;
-
-      if (t.x < t.r || t.x > CANVAS_W - t.r) t.vx *= -1;
-      if (t.y < TEDDY_TOP_MIN || t.y > TEDDY_TOP_MAX) t.vy *= -1;
-    });
-
-    // Teddy–teddy bounce
-    const a = list[0];
-    const b = list[1];
-
-    if (!a.hit && !b.hit) {
-      const dx = b.x - a.x;
-      const dy = b.y - a.y;
-      const dist = Math.hypot(dx, dy);
-      const minDist = a.r + b.r;
-
-      if (dist < minDist) {
-        const nx = dx / dist;
-        const ny = dy / dist;
-
-        // Swap velocities (soft elastic feel)
-        [a.vx, b.vx] = [b.vx, a.vx];
-        [a.vy, b.vy] = [b.vy, a.vy];
-
-        // Separate overlap
-        const overlap = minDist - dist;
-        a.x -= nx * overlap * 0.5;
-        a.y -= ny * overlap * 0.5;
-        b.x += nx * overlap * 0.5;
-        b.y += ny * overlap * 0.5;
-      }
-    }
+    if (t.x < t.r || t.x > CANVAS_W - t.r) t.vx *= -1;
+    if (t.y < TEDDY_TOP_MIN || t.y > TEDDY_TOP_MAX) t.vy *= -1;
   };
 
   /* ---------------- DRAW ---------------- */
 
   const draw = () => {
-    const ctx = canvasRef.current.getContext("2d");
+    const canvas = canvasRef.current;
+    if (!canvas) return; // 👈 VERY IMPORTANT
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
     ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
 
-    // Teddies
-    teddies.current.forEach((t) => {
-      if (!t.hit) {
-        ctx.drawImage(t.img, t.x - t.r, t.y - t.r, t.r * 2, t.r * 2);
-      }
-    });
+    // Teddy
+    if (!teddy.current.hit) {
+      const t = teddy.current;
+      ctx.drawImage(t.img, t.x - t.r, t.y - t.r, t.r * 2, t.r * 2);
+    }
 
     // Ring
     ctx.save();
@@ -213,7 +166,7 @@ export default function TeddyDay({ onComplete }) {
     drawRing(ctx, ring.current);
     ctx.restore();
 
-    // Angle line
+    // Aim line
     if (stateRef.current === "angle" || stateRef.current === "power") {
       ctx.save();
       ctx.translate(CANVAS_W / 2, ring.current.baseY);
@@ -235,7 +188,9 @@ export default function TeddyDay({ onComplete }) {
   /* ---------------- ANIMATE ---------------- */
 
   const animate = () => {
-    updateTeddies();
+    if (stateRef.current === "success") return;
+
+    updateTeddy();
 
     if (stateRef.current === "power") {
       powerTime.current += 0.025;
@@ -256,18 +211,16 @@ export default function TeddyDay({ onComplete }) {
       ring.current.y += ring.current.vy;
       ring.current.rotation += ring.current.spin;
 
-      teddies.current.forEach((t) => {
-        if (!t.hit) {
-          const d = Math.hypot(ring.current.x - t.x, ring.current.y - t.y);
-          if (d < t.r) {
-            t.hit = true;
-            ring.current.active = false;
-            setShowNext(true);
-            stateRef.current = "success";
-            setUiState("success");
-          }
+      const t = teddy.current;
+      if (!t.hit) {
+        const d = Math.hypot(ring.current.x - t.x, ring.current.y - t.y);
+        if (d < t.r) {
+          t.hit = true;
+          ring.current.active = false;
+          stateRef.current = "success";
+          setUiState("success");
         }
-      });
+      }
 
       if (
         ring.current.y > CANVAS_H + 60 ||
@@ -298,6 +251,8 @@ export default function TeddyDay({ onComplete }) {
       active: false,
     };
 
+    teddy.current.hit = false;
+
     stateRef.current = "angle";
     setUiState("angle");
     startAngleTween();
@@ -311,35 +266,52 @@ export default function TeddyDay({ onComplete }) {
       style={{ height: "calc(100vh - 48px)" }}
     >
       <h1 className="text-3xl">Teddy Day 🧸</h1>
-      <p className="text-sm opacity-80">Aim carefully… they won’t stay still 💛</p>
 
-      <canvas ref={canvasRef} className="rounded-xl shadow-xl" />
+      {uiState !== "success" && (
+        <>
+          <p className="text-sm opacity-80">
+            Aim carefully… this teddy keeps moving 💛
+          </p>
 
-      {!showNext && (
-        <button
-          onClick={() => {
-            if (uiState === "angle") lockAngle();
-            if (uiState === "power") throwRing();
-          }}
-          disabled={uiState !== "angle" && uiState !== "power"}
-          className={`mt-4 px-6 py-3 rounded-full text-white transition ${
-            uiState === "angle" || uiState === "power"
-              ? "bg-rose animate-pulse"
-              : "bg-gray-400 opacity-50"
-          }`}
-        >
-          {uiState === "angle" && "💘 Lock Our Direction"}
-          {uiState === "power" && "💖 Send All My Love"}
-        </button>
+          <canvas ref={canvasRef} className="rounded-xl shadow-xl" />
+
+          <button
+            onClick={() => {
+              if (uiState === "angle") lockAngle();
+              if (uiState === "power") throwRing();
+            }}
+            disabled={uiState !== "angle" && uiState !== "power"}
+            className={`mt-4 px-6 py-3 rounded-full text-white transition ${
+              uiState === "angle" || uiState === "power"
+                ? "bg-rose animate-pulse"
+                : "bg-gray-400 opacity-50"
+            }`}
+          >
+            {uiState === "angle" && "💘 Lock Our Direction"}
+            {uiState === "power" && "💖 Send All My Love"}
+          </button>
+        </>
       )}
 
-      {showNext && (
-        <button
-          onClick={onComplete}
-          className="mt-4 px-6 py-2 bg-rose text-white rounded-full"
-        >
-          Keep Going 💌
-        </button>
+      {/* -------- FINAL TEDDY SCREEN -------- */}
+      {uiState === "success" && (
+        <div className="flex flex-col items-center gap-4 mt-6">
+          <img
+            src="/assets/photos/teddy-big.png"
+            alt="Teddy"
+            className="w-40 drop-shadow-xl"
+          />
+          <p className="text-lg">
+            You caught my heart…
+            <br /> and now this teddy is yours 🧸💛
+          </p>
+          <button
+            onClick={onComplete}
+            className="mt-2 px-6 py-2 bg-rose text-white rounded-full"
+          >
+            Keep Going 💌
+          </button>
+        </div>
       )}
     </div>
   );
