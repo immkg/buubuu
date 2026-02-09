@@ -98,12 +98,20 @@ export default function TeddyDay({ onComplete }) {
   /* ---------------- THROW ---------------- */
 
   const throwRing = () => {
-    const power = (Math.sin(powerTime.current) + 1) / 2;
+    // Raw oscillation (0 → 1)
+    const raw = (Math.sin(powerTime.current) + 1) / 2;
 
-    ring.current.vx =
-      Math.sin(lockedAngle.current) * (8 + power * 10);
-    ring.current.vy =
-      -Math.cos(lockedAngle.current) * (8 + power * 10);
+    // Precision curve: ONLY near the peak is powerful
+    // This makes success ~10%
+    const precision = Math.pow(raw, 6); // 🔥 key line
+
+    // Clamp minimum so most throws are weak
+    const power = 0.15 + precision * 0.85;
+
+    const strength = 7 + power * 11;
+
+    ring.current.vx = Math.sin(lockedAngle.current) * strength;
+    ring.current.vy = -Math.cos(lockedAngle.current) * strength;
 
     ring.current.spin = 0.2 + power * 0.6;
     ring.current.active = true;
@@ -177,16 +185,15 @@ export default function TeddyDay({ onComplete }) {
   const animate = () => {
     // POWER: guaranteed visible pulse
     if (stateRef.current === "power") {
-      powerTime.current += 0.07;
+      powerTime.current += 0.025;
       const p = (Math.sin(powerTime.current) + 1) / 2;
 
       const dist = 40 * p;
 
-      ring.current.scale = 0.6 + p * 1.2; // BIG pulse
+      ring.current.scale = 0.7 + Math.pow(p, 0.5) * 1.1;
       ring.current.rotation += 0.06;
 
-      ring.current.x =
-        CANVAS_W / 2 + Math.sin(lockedAngle.current) * dist;
+      ring.current.x = CANVAS_W / 2 + Math.sin(lockedAngle.current) * dist;
       ring.current.y =
         ring.current.baseY - Math.cos(lockedAngle.current) * dist;
     }
@@ -253,40 +260,30 @@ export default function TeddyDay({ onComplete }) {
       style={{ height: "calc(100vh - 48px)" }}
     >
       <h1 className="text-3xl">Teddy Day 🧸</h1>
-      <p className="text-sm opacity-80">
-        Build the love… then let it fly 💛
-      </p>
+      <p className="text-sm opacity-80">Build the love… then let it fly 💛</p>
 
       <canvas ref={canvasRef} className="rounded-xl shadow-xl" />
 
+      {/* SINGLE ACTION BUTTON */}
       {!showNext && (
-        <div className="flex gap-4 mt-4">
-          <button
-            disabled={uiState !== "angle"}
-            onClick={lockAngle}
-            className={`px-5 py-3 rounded-full text-white ${
-              uiState === "angle"
-                ? "bg-rose animate-pulse"
-                : "bg-gray-400 opacity-50"
-            }`}
-          >
-            💘 Lock Our Direction
-          </button>
-
-          <button
-            disabled={uiState !== "power"}
-            onClick={throwRing}
-            className={`px-5 py-3 rounded-full text-white ${
-              uiState === "power"
-                ? "bg-rose animate-pulse"
-                : "bg-gray-400 opacity-50"
-            }`}
-          >
-            💖 Send All My Love
-          </button>
-        </div>
+        <button
+          onClick={() => {
+            if (uiState === "angle") lockAngle();
+            if (uiState === "power") throwRing();
+          }}
+          disabled={uiState !== "angle" && uiState !== "power"}
+          className={`mt-4 px-6 py-3 rounded-full text-white transition ${
+            uiState === "angle" || uiState === "power"
+              ? "bg-rose animate-pulse"
+              : "bg-gray-400 opacity-50"
+          }`}
+        >
+          {uiState === "angle" && "💘 Lock Our Direction"}
+          {uiState === "power" && "💖 Send All My Love"}
+        </button>
       )}
 
+      {/* NEXT BUTTON */}
       {showNext && (
         <button
           onClick={onComplete}
