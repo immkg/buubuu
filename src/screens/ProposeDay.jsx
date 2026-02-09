@@ -24,26 +24,29 @@ export default function ProposeDay({ onComplete }) {
   /* ---------- START MUSIC ON USER ACTION ---------- */
   const startMusic = () => {
     if (!musicStarted && audioRef.current) {
-      audioRef.current.volume = 0.6;
-      audioRef.current.play().catch(() => {});
+      const audio = audioRef.current;
+
+      // 👇 SEEK AHEAD (adjust seconds as you like)
+      audio.currentTime = 30;
+
+      audio.play().catch(() => {});
       setMusicStarted(true);
     }
   };
 
   /* ---------- ESCAPE (ROSE DAY STYLE) ---------- */
-  const handleEscape = (e) => {
-    if (!escapeMode || !noRef.current) return;
+  const handleEscape = (e, ref) => {
+    if (!escapeMode || !ref.current) return;
 
-    const rect = noRef.current.getBoundingClientRect();
+    const rect = ref.current.getBoundingClientRect();
     const dx = e.clientX - rect.left;
     const dy = e.clientY - rect.top;
 
-    gsap.to(noRef.current, {
+    gsap.to(ref.current, {
       x: -dx + Math.random() * 120 - 60,
       y: -dy + Math.random() * 120 - 60,
       rotate: Math.random() * 10 - 5,
-      duration: 0.25,
-      ease: "power2.out",
+      duration: 0.2,
     });
   };
 
@@ -51,14 +54,9 @@ export default function ProposeDay({ onComplete }) {
     <div
       className="relative overflow-hidden flex items-center justify-center text-center px-6"
       style={{ height: "calc(100vh - 48px)" }}
-      onMouseMove={handleEscape}
     >
       {/* AUDIO */}
-      <audio
-        ref={audioRef}
-        src="/assets/music/paper-rings.mp3"
-        loop
-      />
+      <audio ref={audioRef} src="/assets/music/paper-rings.mp3" loop />
 
       {/* BACKGROUND */}
       <div className="absolute inset-0 bg-gradient-to-br from-pink-900 via-rose-900 to-black opacity-90" />
@@ -66,7 +64,6 @@ export default function ProposeDay({ onComplete }) {
 
       {/* CONTENT */}
       <div className="relative z-10 max-w-md text-cream flex flex-col items-center gap-6">
-
         {/* STEP 0 */}
         {step === 0 && (
           <div ref={textRef}>
@@ -139,7 +136,7 @@ export default function ProposeDay({ onComplete }) {
 
         {/* STEP 3 – FAKE NO */}
         {step === 3 && (
-          <div ref={textRef}>
+          <div ref={textRef} onMouseMove={(e) => handleEscape(e, noRef)}>
             <p className="text-lg mb-6">
               Final question.
               <br />
@@ -162,7 +159,7 @@ export default function ProposeDay({ onComplete }) {
                 className="px-6 py-2 bg-wine rounded-full"
                 onMouseEnter={() => setEscapeMode(true)}
               >
-                Is that even a question? 😏
+                Let me think 🤨
               </button>
             </div>
           </div>
@@ -171,9 +168,7 @@ export default function ProposeDay({ onComplete }) {
         {/* STEP 4 – FINAL */}
         {step === 4 && (
           <div ref={textRef} className="flex flex-col items-center gap-4">
-            <p className="text-2xl font-semibold">
-              Thought so 😌
-            </p>
+            <p className="text-2xl font-semibold">Thought so 😌</p>
             <p className="text-lg">
               No diamonds.
               <br />
