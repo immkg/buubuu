@@ -5,16 +5,18 @@ const CANVAS_W = 360;
 const CANVAS_H = 480;
 const GRAVITY = 0.35;
 
+// Teddy movement bounds
+const TEDDY_TOP_MIN = CANVAS_H * 0.05;
+const TEDDY_TOP_MAX = CANVAS_H * 0.25;
+const TEDDY_SPEED = 0.35;
+
 export default function TeddyDay({ onComplete }) {
   const canvasRef = useRef(null);
 
   /* ---------------- STATE ---------------- */
 
-  // React state = UI only
   const [uiState, setUiState] = useState("angle");
   const [showNext, setShowNext] = useState(false);
-
-  // REAL state used by animation loop
   const stateRef = useRef("angle");
 
   /* ---------------- ANGLE ---------------- */
@@ -41,18 +43,32 @@ export default function TeddyDay({ onComplete }) {
     active: false,
   });
 
-  /* ---------------- TEDDIES ---------------- */
+  /* ---------------- TEDDIES (ONLY 2) ---------------- */
 
   const teddyImgs = useRef([
-    "/assets/photos/teddy-small.png",
     "/assets/photos/teddy-medium.png",
     "/assets/photos/teddy-big.png",
   ]);
 
   const teddies = useRef([
-    { x: 70, y: 120, r: 32, img: new Image(), hit: false },
-    { x: 180, y: 100, r: 42, img: new Image(), hit: false },
-    { x: 290, y: 130, r: 52, img: new Image(), hit: false },
+    {
+      x: 120,
+      y: 110,
+      r: 42,
+      vx: TEDDY_SPEED,
+      vy: TEDDY_SPEED * 0.6,
+      img: new Image(),
+      hit: false,
+    },
+    {
+      x: 240,
+      y: 140,
+      r: 52,
+      vx: -TEDDY_SPEED * 0.8,
+      vy: TEDDY_SPEED,
+      img: new Image(),
+      hit: false,
+    },
   ]);
 
   /* ---------------- INIT ---------------- */
@@ -98,21 +114,13 @@ export default function TeddyDay({ onComplete }) {
   /* ---------------- THROW ---------------- */
 
   const throwRing = () => {
-    // Raw oscillation (0 → 1)
     const raw = (Math.sin(powerTime.current) + 1) / 2;
-
-    // Precision curve: ONLY near the peak is powerful
-    // This makes success ~10%
-    const precision = Math.pow(raw, 6); // 🔥 key line
-
-    // Clamp minimum so most throws are weak
+    const precision = Math.pow(raw, 6);
     const power = 0.15 + precision * 0.85;
-
     const strength = 7 + power * 11;
 
     ring.current.vx = Math.sin(lockedAngle.current) * strength;
     ring.current.vy = -Math.cos(lockedAngle.current) * strength;
-
     ring.current.spin = 0.2 + power * 0.6;
     ring.current.active = true;
 
@@ -142,6 +150,50 @@ export default function TeddyDay({ onComplete }) {
     ctx.restore();
   };
 
+  /* ---------------- TEDDY MOVEMENT ---------------- */
+
+  const updateTeddies = () => {
+    const list = teddies.current;
+
+    // Move + wall bounce
+    list.forEach((t) => {
+      if (t.hit) return;
+
+      t.x += t.vx;
+      t.y += t.vy;
+
+      if (t.x < t.r || t.x > CANVAS_W - t.r) t.vx *= -1;
+      if (t.y < TEDDY_TOP_MIN || t.y > TEDDY_TOP_MAX) t.vy *= -1;
+    });
+
+    // Teddy–teddy bounce
+    const a = list[0];
+    const b = list[1];
+
+    if (!a.hit && !b.hit) {
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const dist = Math.hypot(dx, dy);
+      const minDist = a.r + b.r;
+
+      if (dist < minDist) {
+        const nx = dx / dist;
+        const ny = dy / dist;
+
+        // Swap velocities (soft elastic feel)
+        [a.vx, b.vx] = [b.vx, a.vx];
+        [a.vy, b.vy] = [b.vy, a.vy];
+
+        // Separate overlap
+        const overlap = minDist - dist;
+        a.x -= nx * overlap * 0.5;
+        a.y -= ny * overlap * 0.5;
+        b.x += nx * overlap * 0.5;
+        b.y += ny * overlap * 0.5;
+      }
+    }
+  };
+
   /* ---------------- DRAW ---------------- */
 
   const draw = () => {
@@ -161,7 +213,7 @@ export default function TeddyDay({ onComplete }) {
     drawRing(ctx, ring.current);
     ctx.restore();
 
-    // Angle line (angle + power)
+    // Angle line
     if (stateRef.current === "angle" || stateRef.current === "power") {
       ctx.save();
       ctx.translate(CANVAS_W / 2, ring.current.baseY);
@@ -183,11 +235,11 @@ export default function TeddyDay({ onComplete }) {
   /* ---------------- ANIMATE ---------------- */
 
   const animate = () => {
-    // POWER: guaranteed visible pulse
+    updateTeddies();
+
     if (stateRef.current === "power") {
       powerTime.current += 0.025;
       const p = (Math.sin(powerTime.current) + 1) / 2;
-
       const dist = 40 * p;
 
       ring.current.scale = 0.7 + Math.pow(p, 0.5) * 1.1;
@@ -198,7 +250,6 @@ export default function TeddyDay({ onComplete }) {
         ring.current.baseY - Math.cos(lockedAngle.current) * dist;
     }
 
-    // THROW PHYSICS
     if (stateRef.current === "throw" && ring.current.active) {
       ring.current.vy += GRAVITY;
       ring.current.x += ring.current.vx;
@@ -260,11 +311,10 @@ export default function TeddyDay({ onComplete }) {
       style={{ height: "calc(100vh - 48px)" }}
     >
       <h1 className="text-3xl">Teddy Day 🧸</h1>
-      <p className="text-sm opacity-80">Build the love… then let it fly 💛</p>
+      <p className="text-sm opacity-80">Aim carefully… they won’t stay still 💛</p>
 
       <canvas ref={canvasRef} className="rounded-xl shadow-xl" />
 
-      {/* SINGLE ACTION BUTTON */}
       {!showNext && (
         <button
           onClick={() => {
@@ -283,7 +333,6 @@ export default function TeddyDay({ onComplete }) {
         </button>
       )}
 
-      {/* NEXT BUTTON */}
       {showNext && (
         <button
           onClick={onComplete}
