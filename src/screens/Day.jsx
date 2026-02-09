@@ -8,10 +8,9 @@ import ChocolateDay from "./ChocolateDay";
 import TeddyDay from "./TeddyDay";
 
 export default function Day({ dayIndex, onComplete }) {
-  const dayKey = "teddy";
+  const dayKey = VALENTINE_DAYS[dayIndex].key;
   const content = DAY_CONTENT[dayKey];
 
-  // 🌹 Custom Rose Day
   if (dayKey === "rose") {
     return <RoseDay onComplete={onComplete} />;
   }
