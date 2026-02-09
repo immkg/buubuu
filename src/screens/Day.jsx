@@ -9,7 +9,7 @@ import TeddyDay from "./TeddyDay";
 import ProposeDay from "./ProposeDay";
 
 export default function Day({ dayIndex, onComplete }) {
-  const dayKey = "propose";
+  const dayKey = VALENTINE_DAYS[dayIndex].key;
   const content = DAY_CONTENT[dayKey];
 
   if (dayKey === "rose") {
