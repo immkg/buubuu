@@ -297,7 +297,7 @@ export default function TeddyDay({ onComplete }) {
       {uiState === "success" && (
         <div className="flex flex-col items-center gap-4 mt-6">
           <img
-            src="/assets/photos/teddy.jpeg"
+            src="/assets/photos/teddy.png"
             alt="Teddy"
             className="w-80 drop-shadow-xl"
           />

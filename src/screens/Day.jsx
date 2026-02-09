@@ -15,6 +15,7 @@ export default function Day({ dayIndex, onComplete }) {
   if (dayKey === "rose") {
     return <RoseDay onComplete={onComplete} />;
   }
+  
   if (dayKey === "propose") {
     return <ProposeDay onComplete={onComplete} />;
   }

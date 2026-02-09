@@ -276,6 +276,15 @@ export default function ChocolateDay({ onComplete }) {
     );
   };
 
+  const clearFloatingCutouts = () => {
+    floatingRef.current.forEach((f) => {
+      if (f.el && f.el.parentNode) {
+        f.el.parentNode.removeChild(f.el);
+      }
+    });
+    floatingRef.current = [];
+  };
+
   return (
     <div
       className="flex flex-col items-center justify-center gap-6 text-center"
@@ -293,7 +302,10 @@ export default function ChocolateDay({ onComplete }) {
       {showNext && (
         <button
           className="text-white mt-4 px-6 py-2 bg-rose rounded-full animate-fade-in"
-          onClick={onComplete}
+          onClick={() => {
+            clearFloatingCutouts();
+            onComplete();
+          }}
         >
           Keep Going 💌
         </button>
