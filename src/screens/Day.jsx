@@ -7,6 +7,7 @@ import RoseDay from "./RoseDay";
 import ChocolateDay from "./ChocolateDay";
 import TeddyDay from "./TeddyDay";
 import ProposeDay from "./ProposeDay";
+import PromiseDay from "./PromiseDay";
 
 export default function Day({ dayIndex, onComplete }) {
   const dayKey = VALENTINE_DAYS[dayIndex].key;
@@ -26,6 +27,10 @@ export default function Day({ dayIndex, onComplete }) {
 
   if (dayKey === "teddy") {
     return <TeddyDay onComplete={onComplete} />;
+  }
+
+  if (dayKey === "promise") {
+    return <PromiseDay onComplete={onComplete} />;
   }
 
   return (
