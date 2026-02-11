@@ -29,6 +29,17 @@ export default function PromiseDay({ onComplete }) {
   };
 
   const allAgreed = agreed.every(Boolean);
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    if (sealed && videoRef.current) {
+      gsap.fromTo(
+        videoRef.current,
+        { opacity: 0, scale: 0.9 },
+        { opacity: 1, scale: 1, duration: 0.8 }
+      );
+    }
+  }, [sealed]);
 
   return (
     <div
@@ -40,7 +51,6 @@ export default function PromiseDay({ onComplete }) {
       <div className="absolute inset-0 bg-black/50" />
 
       <div className="relative z-10 max-w-md text-cream flex flex-col items-center gap-6">
-
         {/* STEP 0 — ARRIVAL */}
         {step === 0 && (
           <div ref={textRef}>
@@ -69,9 +79,7 @@ export default function PromiseDay({ onComplete }) {
               They don’t make life easy.
             </p>
 
-            <p className="opacity-80 mt-3">
-              They just make us honest.
-            </p>
+            <p className="opacity-80 mt-3">They just make us honest.</p>
 
             <button
               className="mt-6 px-6 py-2 bg-rose rounded-full text-white"
@@ -105,7 +113,8 @@ export default function PromiseDay({ onComplete }) {
                     : "bg-black/40 border-white/30 hover:bg-black/60"
                 }`}
               >
-                {agreed[i] ? "✓ " : ""}{text}
+                {agreed[i] ? "✓ " : ""}
+                {text}
               </div>
             ))}
 
@@ -123,9 +132,7 @@ export default function PromiseDay({ onComplete }) {
         {/* STEP 3 — THE HARD PROMISE */}
         {step === 3 && (
           <div ref={textRef}>
-            <p className="text-lg">
-              And here’s the hardest one.
-            </p>
+            <p className="text-lg">And here’s the hardest one.</p>
 
             <p className="italic opacity-90 mt-4">
               We promise to stay,
@@ -150,9 +157,7 @@ export default function PromiseDay({ onComplete }) {
         {/* STEP 4 — PERSONAL WORD */}
         {step === 4 && (
           <div ref={textRef}>
-            <p className="text-lg">
-              This part is just from me.
-            </p>
+            <p className="text-lg">This part is just from me.</p>
 
             <p className="opacity-90 mt-3">
               I can’t promise perfection.
@@ -182,14 +187,22 @@ export default function PromiseDay({ onComplete }) {
             </p>
 
             <div
-              className={`w-24 h-24 rounded-full border-2 flex items-center justify-center text-xl cursor-pointer transition-all ${
-                sealed
-                  ? "bg-rose border-rose scale-110"
-                  : "border-white/50 hover:scale-105"
-              }`}
+              className="w-64 h-64 rounded-full border-2 border-rose overflow-hidden cursor-pointer transition-all hover:scale-105"
               onClick={() => setSealed(true)}
             >
-              🤍
+              {!sealed ? (
+                <div className="w-full h-full flex items-center justify-center text-2xl">
+                  🤍
+                </div>
+              ) : (
+                <video
+                  ref={videoRef}
+                  src="/assets/reels/promise.mp4"
+                  autoPlay
+                  playsInline
+                  className="w-full h-full object-cover"
+                />
+              )}
             </div>
 
             {sealed && (
@@ -202,7 +215,6 @@ export default function PromiseDay({ onComplete }) {
             )}
           </div>
         )}
-
       </div>
     </div>
   );
