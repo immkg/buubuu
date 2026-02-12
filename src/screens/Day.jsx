@@ -8,6 +8,9 @@ import ChocolateDay from "./ChocolateDay";
 import TeddyDay from "./TeddyDay";
 import ProposeDay from "./ProposeDay";
 import PromiseDay from "./PromiseDay";
+import HugDay from "./HugDay";
+import KissDay from "./KissDay";
+import ValentineDay from "./ValentineDay";
 
 export default function Day({ dayIndex, onComplete }) {
   const dayKey = VALENTINE_DAYS[dayIndex].key;
@@ -16,7 +19,7 @@ export default function Day({ dayIndex, onComplete }) {
   if (dayKey === "rose") {
     return <RoseDay onComplete={onComplete} />;
   }
-  
+
   if (dayKey === "propose") {
     return <ProposeDay onComplete={onComplete} />;
   }
@@ -31,6 +34,15 @@ export default function Day({ dayIndex, onComplete }) {
 
   if (dayKey === "promise") {
     return <PromiseDay onComplete={onComplete} />;
+  }
+  if (dayKey === "hug") {
+    return <HugDay onComplete={onComplete} />;
+  }
+  if (dayKey === "kiss") {
+    return <KissDay onComplete={onComplete} />;
+  }
+  if (dayKey === "valentine") {
+    return <ValentineDay onComplete={onComplete} />;
   }
 
   return (
