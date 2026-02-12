@@ -9,32 +9,49 @@ export default function KissDay({ onComplete }) {
   const containerRef = useRef(null);
 
   const spawnHeart = () => {
+    if (!containerRef.current) return;
+
     const heart = document.createElement("div");
+
+    // Randomly choose slow or normal
+    const isSlow = Math.random() < 0.4; // 40% chance slow kiss
+
     heart.innerText = "💋";
     heart.style.position = "absolute";
-    heart.style.fontSize = "28px";
-    heart.style.left = Math.random() * window.innerWidth + "px";
-    heart.style.top = window.innerHeight + "px";
+    heart.style.fontSize = isSlow ? "38px" : "28px";
+    heart.style.left = Math.random() * (window.innerWidth - 60) + "px";
+
+    // Start slightly inside screen (not fully bottom)
+    heart.style.top = window.innerHeight - 100 + "px";
     heart.style.cursor = "pointer";
+    heart.style.userSelect = "none";
 
     heart.onclick = () => {
       setScore((s) => s + 1);
-      heart.remove();
+
+      // cute pop effect
+      gsap.to(heart, {
+        scale: 1.6,
+        opacity: 0,
+        duration: 0.3,
+        onComplete: () => heart.remove(),
+      });
     };
 
     containerRef.current.appendChild(heart);
 
     gsap.to(heart, {
-      y: -window.innerHeight - 200,
-      duration: 4,
-      ease: "none",
+      y: -window.innerHeight,
+      x: "+=" + (Math.random() * 100 - 50), // slight sideways float
+      duration: isSlow ? 6 : 4.5, // slow ones float longer
+      ease: "power1.out",
       onComplete: () => heart.remove(),
     });
   };
 
   useEffect(() => {
     if (step === 1) {
-      const interval = setInterval(spawnHeart, 500);
+      const interval = setInterval(spawnHeart, 700);
       return () => clearInterval(interval);
     }
   }, [step]);
@@ -83,7 +100,7 @@ export default function KissDay({ onComplete }) {
               You win.
             </p>
             <img
-              src="/assets/photos/mayank-richika-kiss.png"
+              src="/assets/photos/mayank-richika-4.png"
               className="w-72 rounded-2xl shadow-xl"
             />
             <button
