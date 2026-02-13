@@ -8,6 +8,6 @@ export function getTodayValentineIndex() {
     );
   
     // Clamp between 0 and 6
-    return Math.max(0, Math.min(diff, 6));
+    return Math.max(0, Math.min(diff, 7));
   }
   
