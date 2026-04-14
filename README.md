@@ -1,16 +1,59 @@
-# React + Vite
+# buubuu
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An interactive romantic web experience crafted to capture love, memories, and moments.
 
-Currently, two official plugins are available:
+🔗 Live: https://mayanklovesrichika.life/
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## Preview
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Day 1 - Rose Day
 
-## Expanding the ESLint configuration
+![Day 1 Screenshot](./screenshots/day1.png)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Day 2 - Propose Day
+
+![Day 2 Screenshot](./screenshots/day2.png)
+
+### Day 3 - Chocolate Day
+
+![Day 3 Screenshot](./screenshots/day3.png)
+
+### Day 4 - Teddy Day
+
+![Day 4 Screenshot](./screenshots/day4.png)
+
+### Day 5 - Promise Day
+
+![Day 5 Screenshot](./screenshots/day5.png)
+
+### Day 6 - Hug Day
+
+![Day 6 Screenshot](./screenshots/day6.png)
+
+### Day 7 - Kiss Day
+
+![Day 7 Screenshot](./screenshots/day7.png)
+
+### Day 7 - Valentine’s Day
+
+![Day 8 Screenshot](./screenshots/day8.png)
+
+---
+
+## Tech
+
+- React
+- Vite
+
+---
+
+## Run Locally
+
+```bash
+git clone https://github.com/immkg/buubuu.git
+cd buubuu
+npm install
+npm run dev
+```
