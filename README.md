@@ -57,3 +57,9 @@ cd buubuu
 npm install
 npm run dev
 ```
+
+---
+
+## License
+
+MIT License © 2026
