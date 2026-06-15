@@ -17,9 +17,23 @@ export default function App() {
 
   // Sync state -> hash (for Google Analytics page tracking)
   useEffect(() => {
-    const dayKey = VALENTINE_DAYS[currentDay]?.key;
-    if (dayKey && window.location.hash !== `#/${dayKey}`) {
+    const day = VALENTINE_DAYS[currentDay];
+    const dayKey = day?.key;
+
+    if (!dayKey) return;
+
+    if (window.location.hash !== `#/${dayKey}`) {
       window.location.hash = `#/${dayKey}`;
+    }
+
+    document.title = `${day.label} ❤️ Buubuu`;
+
+    if (window.gtag) {
+      window.gtag("event", "page_view", {
+        page_title: `${day.label} ❤️ Buubuu`,
+        page_path: `#/${dayKey}`,
+        page_location: window.location.href,
+      });
     }
   }, [currentDay]);
 
