@@ -1,38 +1,56 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { VALENTINE_DAYS } from "./data/valentineDays";
 import ValentineStepper from "./components/ValentineStepper";
 import Day from "./screens/Day";
-import Locked from "./screens/Locked";
 import HeartCursor from "./components/HeartCursor";
-
-import { getTodayValentineIndex } from "./utils/date";
+import SoundToggle from "./components/SoundToggle";
 
 export default function App() {
-  const todayIndex = getTodayValentineIndex();
+  // Helper to parse current index from hash
+  const getIndexFromHash = () => {
+    const hash = window.location.hash.replace("#/", "").replace("#", "");
+    const index = VALENTINE_DAYS.findIndex((day) => day.key === hash);
+    return index !== -1 ? index : 0;
+  };
 
-  const [currentDay, setCurrentDay] = useState(todayIndex);
+  const [currentDay, setCurrentDay] = useState(getIndexFromHash);
 
-  const isLocked = currentDay > todayIndex;
+  // Sync state -> hash (for Google Analytics page tracking)
+  useEffect(() => {
+    const dayKey = VALENTINE_DAYS[currentDay]?.key;
+    if (dayKey && window.location.hash !== `#/${dayKey}`) {
+      window.location.hash = `#/${dayKey}`;
+    }
+  }, [currentDay]);
+
+  // Sync hash -> state (for browser back/forward buttons)
+  useEffect(() => {
+    const handleHashChange = () => {
+      setCurrentDay(getIndexFromHash());
+    };
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
 
   const completeDay = () => {
-    // move to NEXT day even if locked
-    setCurrentDay((prev) => prev + 1);
+    if (currentDay < VALENTINE_DAYS.length - 1) {
+      setCurrentDay((prev) => prev + 1);
+    }
   };
 
   return (
     <>
       <HeartCursor />
+      <SoundToggle />
 
       <ValentineStepper
-        todayIndex={todayIndex}
         currentDay={currentDay}
         onSelectDay={setCurrentDay}
       />
 
-      {isLocked ? (
-        <Locked />
-      ) : (
-        <Day dayIndex={currentDay} onComplete={completeDay} />
-      )}
+      <Day dayIndex={currentDay} onComplete={completeDay} />
     </>
   );
 }
+
+

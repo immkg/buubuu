@@ -31,7 +31,7 @@ export default function ProposeDay({ onComplete }) {
       // 👇 SEEK AHEAD (adjust seconds as you like)
       audio.currentTime = 30;
 
-      audio.play().catch(() => {});
+      audio.play().catch(() => { });
       setMusicStarted(true);
     }
   };
